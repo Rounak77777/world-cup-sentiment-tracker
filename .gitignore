@@ -1,0 +1,14 @@
+#Virtual Environments
+.venv/
+venv/
+env/
+
+#Python Cache
+__pycache__/
+*.pyc
+
+#Local Databases 
+sentiment_data.db
+
+#OS Junk
+.DS_Store

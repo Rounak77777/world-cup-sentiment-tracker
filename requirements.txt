@@ -1,0 +1,7 @@
+websockets
+redis
+transformers
+torch
+scipy
+pandas
+dash
