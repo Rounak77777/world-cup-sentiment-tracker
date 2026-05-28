@@ -8,7 +8,17 @@ import re
 #port 6379 is default Redis port & db=0 is default database, decode_responses=True ensures we get clean strings back, not raw bytes
 redis_client = redis.Redis(host='redis', port=6379, db=0, decode_responses=True) 
 
-KEYWORDS = ["arsenal", "man city", "haaland", "saka", "pep", "arteta", "premier league"] 
+KEYWORDS = [
+    #core tournament (high volume)
+    "world cup", "fifa2026", "wc2026", "worldcup2026",
+    
+    #high signal country identifiers (low noise)
+    "#eng", "#fra", "#bra", "#arg", "#esp", "#usmnt", 
+    "three lions", "seleção", "allez les bleus", "la albiceleste",
+    
+    #elite players (high specific volume)
+    "mbappe", "bellingham", "vinicius", "messi", "lamine yamal", "haaland", "ronaldo"
+]
 
 #compiling regex pattern for strict word boundaries, ensures "pep" matches "pep out" but ignores "peppermint"
 # \b means "word boundary", this creates a pattern like: \b(arsenal|man city|haaland|saka|pep)\b

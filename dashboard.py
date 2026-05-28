@@ -11,7 +11,7 @@ app = dash.Dash(__name__)
 
 #UI Layout
 app.layout = html.Div(style={'backgroundColor': '#111111', 'color': '#7FDBFF', 'fontFamily': 'sans-serif'}, children=[
-    html.H1("Live Premier League Sentiment Tracker", style={'textAlign': 'center', 'padding': '20px'}),
+    html.H1("World Cup 2026 Live Sentiment Tracker", style={'textAlign': 'center', 'padding': '20px'}),
     
     #graph comment 
     dcc.Graph(id='live-graph', animate=False),
