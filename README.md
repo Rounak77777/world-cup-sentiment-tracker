@@ -2,7 +2,7 @@
 A distributed, asynchronous data pipeline that ingests live social media data, performs real-time Natural Language Processing (NLP), and visualizes public sentiment shifts during the 2026 FIFA World Cup.
 
 ## 📺 Live Demo
-*(Insert a link to a 2-minute YouTube screen recording of your dashboard updating live here)*
+https://www.loom.com/share/e6545df1bbb347478db5d4b319a9a0ef
 
 ## 🏗️ System Architecture
 This project is built using a decoupled microservices architecture, entirely containerized via Docker.

@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# Python caching and environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+env.bak/
+venv.bak/
+
+# Project specific
+sentiment_data.db
+.env
+
+# Jupyter Notebooks (if you used them for testing)
+.ipynb_checkpoints
+*.ipynb

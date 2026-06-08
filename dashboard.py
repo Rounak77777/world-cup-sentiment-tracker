@@ -28,19 +28,38 @@ app.layout = html.Div(style={'backgroundColor': '#111111', 'color': '#7FDBFF', '
 @app.callback(Output('live-graph', 'figure'), 
               [Input('graph-update', 'n_intervals')])
 def update_graph(n):
-    #reading the latest data from SQLite
-    conn = sqlite3.connect('sentiment_data.db', check_same_thread=False)
+    try:
+        #reading the latest data from SQLite
+        conn = sqlite3.connect('sentiment_data.db', check_same_thread=False)
+        
+        #pulling last 90 rows (which equals the last 15 minutes of data at 10s intervals)
+        query = "SELECT * FROM timeline ORDER BY timestamp DESC LIMIT 90"
+        df = pd.read_sql_query(query, conn)
+        conn.close()
+    except Exception:
+        # If the database file or table doesn't exist yet, assign an empty DataFrame
+        df = pd.DataFrame()
     
-    #pulling last 90 rows (which equals the last 15 minutes of data at 10s intervals)
-    query = "SELECT * FROM timeline ORDER BY timestamp DESC LIMIT 90"
-    df = pd.read_sql_query(query, conn)
-    conn.close()
+    # Setup dual axis figure baseline
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
     
+    # Graceful error handling: If database is empty, show a loading placeholder instead of crashing
+    if df.empty:
+        fig.update_layout(
+            template="plotly_dark",
+            annotations=[{
+                "text": "Waiting for live World Cup data pipeline to start...",
+                "xref": "paper", "yref": "paper",
+                "showarrow": False,
+                "font": {"size": 20, "color": "gray"}
+            }]
+        )
+        fig.update_yaxes(title_text="Volume (Posts/10s)", secondary_y=False, showgrid=False)
+        fig.update_yaxes(title_text="Sentiment", range=[-1.1, 1.1], secondary_y=True, showgrid=False)
+        return fig
+
     #SQLite returns descending so we get newest first, but Plotly needs ascending to draw left to right
     df = df.sort_values('timestamp')
-
-    #setup dual axis figure
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     #adding post volume (bar chart in background)
     fig.add_trace(

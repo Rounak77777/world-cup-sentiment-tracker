@@ -1,8 +1,8 @@
 
 services:
-  # 1. THE MESSAGE BROKER
+  # 1. THE MESSAGE BROKER (Lightweight Alpine Version)
   redis:
-    image: redis:latest
+    image: redis:alpine
     ports:
       - "6379:6379"
 
@@ -12,6 +12,10 @@ services:
     command: python producer.py
     depends_on:
       - redis
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - .:/app  # Maps your local directory so code changes update instantly
 
   # 3. THE NLP WORKER
   worker:
@@ -19,9 +23,11 @@ services:
     command: python worker.py
     depends_on:
       - redis
-    # We map a volume so the SQLite database file persists locally and can be shared with the dashboard
+    environment:
+      - PYTHONUNBUFFERED=1
     volumes:
-      - ./sentiment_data.db:/app/sentiment_data.db
+      - .:/app  # Maps local code directory
+      - ./sentiment_data.db:/app/sentiment_data.db  # Shares SQLite database file
 
   # 4. THE FRONTEND
   dashboard:
@@ -31,5 +37,8 @@ services:
       - "8050:8050"
     depends_on:
       - worker
+    environment:
+      - PYTHONUNBUFFERED=1
     volumes:
-      - ./sentiment_data.db:/app/sentiment_data.db
+      - .:/app  # Maps local code directory
+      - ./sentiment_data.db:/app/sentiment_data.db  # Reads shared SQLite database file

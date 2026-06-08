@@ -28,34 +28,42 @@ async def stream_bluesky():
     #only subscribes to text posts, filters out likes/follows at server level
     uri = "wss://jetstream1.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post"
 
-    print("Connecting to Bluesky Firehose...")
+    while True:
+        try:
+            print("Connecting to Bluesky Firehose...")
 
-    #Opening the persistent connection to the Bluesky server
-    async with websockets.connect(uri) as websocket:
-        print("Connected. ...")
-        #infinite listening loop
-        while True:
-             #await pauses specific loop until new message is received, allowing other tasks to run in meantime
-             raw_message = await websocket.recv() 
-             data = json.loads(raw_message) #parses raw json string to python dict
+            #Opening the persistent connection to the Bluesky server
+            async with websockets.connect(uri) as websocket:
+                print("Connected. ...")
+                
+                #infinite listening loop
+                while True:
+                    #await pauses specific loop until new message is received, allowing other tasks to run in meantime
+                    raw_message = await websocket.recv() 
+                    data = json.loads(raw_message) #parses raw json string to python dict
 
-             #Ensures its new post, not a deletion
-             if data.get('kind')=='commit' and data['commit'].get('operation')=='create':
-                  record = data['commit']['record']
+                    #Ensures its new post, not a deletion
+                    if data.get('kind')=='commit' and data['commit'].get('operation')=='create':
+                        record = data['commit']['record']
 
-                  #Extractes text and convert all to lowercase (deafault to empty string if missing)
-                  text =  record.get('text', '').lower() 
+                        #Extractes text and convert all to lowercase (deafault to empty string if missing)
+                        text =  record.get('text', '').lower() 
 
-                  #regex search to ensure only posts that mention keywords as standalone words are captured, not as part of other words
-                  if PATTERN.search(text):
-                    payload = {
-                        "timestamp": record.get('createdAt'),
-                        "text": text
-                    }
-                    
-                    #convert dictionary back to JSON string and push it into Redis List called "match_stream"
-                    redis_client.lpush("match_stream", json.dumps(payload))
-                    print(f"Pushed to queue: {text[:50]}...")
+                        #regex search to ensure only posts that mention keywords as standalone words are captured, not as part of other words
+                        if PATTERN.search(text):
+                            payload = {
+                                "timestamp": record.get('createdAt'),
+                                "text": text
+                            }
+                            
+                            #convert dictionary back to JSON string and push it into Redis List called "match_stream"
+                            redis_client.lpush("match_stream", json.dumps(payload))
+                            print(f"Pushed to queue: {text[:50]}...")
+                            
+        except (websockets.exceptions.ConnectionClosed, Exception) as e:
+            print(f"Pipeline disconnected due to: {e}")
+            print("Attempting reconnection in 5 seconds...")
+            await asyncio.sleep(5) # Gives network breathing room before retrying
 
 
 #Running async event loop 
@@ -63,5 +71,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(stream_bluesky())   
     except KeyboardInterrupt: 
-            print("\nDisconnected.")
-            
+        print("\nDisconnected.")

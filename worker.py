@@ -21,6 +21,16 @@ print("Model loaded. Ready to process.")
 conn = sqlite3.connect('sentiment_data.db', check_same_thread=False)
 cursor = conn.cursor()
 
+# Ensure the necessary table structure exists in the database
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS timeline (
+        timestamp TEXT,
+        avg_sentiment REAL,
+        post_volume INTEGER
+    )
+""")
+conn.commit()
+
 #the math mapping 
 def map_sentiment(label, confidence):
     """Converts discrete labels into a continuous -1.0 to +1.0 scale.""" 

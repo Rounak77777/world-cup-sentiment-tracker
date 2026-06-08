@@ -1,14 +1,18 @@
-#starting with lightweight version of Python 3.11
 FROM python:3.11-slim
+
+#preventing Python from writing .pyc files and force stdout logging
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 #setting working directory inside container
 WORKDIR /app
 
-#copying requirements file and installing libraries
+#copying requirements file and installing libraries first to cache the layer
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 #copying all Python scripts into container
 COPY . .
 
-#we don't define run command here as Docker Compose will tell each container which specific script to run
+#executing the actual script
+CMD ["python", "producer.py"]
